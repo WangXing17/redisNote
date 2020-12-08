@@ -21,9 +21,13 @@ Redis作为一个内存数据库，数据都是存储在内存中，那么一旦
     * 实现原理：
   redis服务器周期性操作函数serverCron默认每隔100毫秒就会执行一次，检查save选项所设置的保存条件是否满足，如果满足的话，执行BGSAVE命令。
 
-4. RDB文件结构：RDB文件是一个经过压缩的二进制文件，有多个部分组成，如下图。
-<br/><div align=center>![image]()
-
+4. RDB文件结构：RDB文件是一个经过压缩的二进制文件，有多个部分组成。
+    * 总结构：
+<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E6%8C%81%E4%B9%85%E5%8C%96/img/rdb%E7%BB%93%E6%9E%84.png)
+   * database部分:
+<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E6%8C%81%E4%B9%85%E5%8C%96/img/rdbDateBase%E7%BB%93%E6%9E%84.png)
+   * key_value_pairs部分：
+ <br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E6%8C%81%E4%B9%85%E5%8C%96/img/rdbKeypaire%E7%BB%93%E6%9E%84.png) 
 
 ## AOF持久化: 实时写入，AOF重写
 1. 前置条件：配置文件中开启AOF持久化开关，默认为关。如下图：
