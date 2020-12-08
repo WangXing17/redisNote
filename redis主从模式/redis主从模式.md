@@ -35,14 +35,14 @@ redis中，通过执行SLAVEOF命令或设置slaveof选项，让一个服务器�
 通过对比主从服务器的复制偏移量，程序可以很容易地知道主从服务器是否处于一致状态：
 * 如果主从服务器处于一致状态，那么主从服务器两者的偏移量总是相同的
 * 相反，如果主从服务器两者的偏移量并不相同，那么说明主从服务器并未处于一致状态
-<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/img/%E5%A4%8D%E5%88%B6%E5%81%8F%E7%A7%BB%E9%87%8F.png)</div>
+<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E4%B8%BB%E4%BB%8E%E6%A8%A1%E5%BC%8F/img/%E5%A4%8D%E5%88%B6%E5%81%8F%E7%A7%BB%E9%87%8F.png)</div>
 #### 复制积压缓冲区
 复制积压缓冲区是由主服务器维护的一个固定长度（fixed-size）先进先出（FIFO）队列，默认大小为1MB。
 当主服务器进行命令传播时，它不仅会将写命令发送给所有从服务器，还会将写命令入队到复制积压缓冲区里面，如下图所示。
-<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/img/%E5%A4%8D%E5%88%B6%E7%A7%AF%E5%8E%8B%E5%8C%BA1.png)</div>
+<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E4%B8%BB%E4%BB%8E%E6%A8%A1%E5%BC%8F/img/%E5%A4%8D%E5%88%B6%E7%A7%AF%E5%8E%8B%E5%8C%BA1.png)</div>
 
 因此，主服务器的复制积压缓冲区里面会保存着一部分最近传播的写命令，并且复制积压缓冲区会为队列中的每个字节记录相应的复制偏移量，如下图所示。
-<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/img/%E5%A4%8D%E5%88%B6%E7%A7%AF%E5%8E%8B%E5%8C%BA2.png)</div>
+<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E4%B8%BB%E4%BB%8E%E6%A8%A1%E5%BC%8F/img/%E5%A4%8D%E5%88%B6%E7%A7%AF%E5%8E%8B%E5%8C%BA2.png)</div>
 
 <br/>当从服务器重新连上主服务器时，从服务器会通过PSYNC命令将自己的复制偏移量offset发送给主服务器，主服务器会根据这个复制偏移量来决定对从服务器执行何种同步操作：
 * 如果offset偏移量之后的数据（也即是偏移量offset+1开始的数据）仍然存在于复制积压缓冲区里面，那么主服务器将对从服务器执行部分重同步操作；
