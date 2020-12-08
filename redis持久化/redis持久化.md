@@ -33,7 +33,6 @@ Redis作为一个内存数据库，数据都是存储在内存中，那么一旦
     * 写入：把aof_buf缓冲区中的内容写入到AOF文件中。
     * 同步：
   <br/><div align=center>![image](https://github.com/WangXing17/redis/blob/main/redis%E6%8C%81%E4%B9%85%E5%8C%96/img/aofFsync.png)
-3. AOF重写：为了解决AOF文件过大的问题。
-4. 执行流程：
-  <br/><div align=center>![image]()
+3. AOF重写：为了解决AOF文件过大的问题，将多条写记录合并为1条写记录。执行流程如下：
+  <br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E6%8C%81%E4%B9%85%E5%8C%96/img/bgrewriteaof.png)
   
