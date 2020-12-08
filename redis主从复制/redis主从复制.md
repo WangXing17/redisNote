@@ -29,29 +29,28 @@ redis中，通过执行SLAVEOF命令或设置slaveof选项，让一个服务器�
     
 #### 复制偏移量
 执行复制的双方——主服务器和从服务器会分别维护一个复制偏移量：
-* 主服务器每次向从服务器传播N个字节的数据时，就将自己的复制偏移量的值加上N；
-* 从服务器每次收到主服务器传播来的N个字节的数据时，就将自己的复制偏移量的值加上N；
+* 主服务器每次向从服务器传播N个字节的数据时，就将自己的复制偏移量的值加上N
+* 从服务器每次收到主服务器传播来的N个字节的数据时，就将自己的复制偏移量的值加上N
 
 通过对比主从服务器的复制偏移量，程序可以很容易地知道主从服务器是否处于一致状态：
-* 如果主从服务器处于一致状态，那么主从服务器两者的偏移量总是相同的；
-* 相反，如果主从服务器两者的偏移量并不相同，那么说明主从服务器并未处于一致状态。
-<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/img/%E5%A4%8D%E5%88%B6%E5%81%8F%E7%A7%BB%E9%87%8F.png)
-    
+* 如果主从服务器处于一致状态，那么主从服务器两者的偏移量总是相同的
+* 相反，如果主从服务器两者的偏移量并不相同，那么说明主从服务器并未处于一致状态
+<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/img/%E5%A4%8D%E5%88%B6%E5%81%8F%E7%A7%BB%E9%87%8F.png)</div>
 #### 复制积压缓冲区
-
-复制积压缓冲区是由主服务器维护的一个固定长度（fixed-size）先进先出（FIFO）队列，默认大小为1MB。当主服务器进行命令传播时，它不仅会将写命令发送给所有从服务器，还会将写命令入队到复制积压缓冲区里面，如下图所示。
-<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/img/%E5%A4%8D%E5%88%B6%E7%A7%AF%E5%8E%8B%E5%8C%BA1.png)
+复制积压缓冲区是由主服务器维护的一个固定长度（fixed-size）先进先出（FIFO）队列，默认大小为1MB。
+当主服务器进行命令传播时，它不仅会将写命令发送给所有从服务器，还会将写命令入队到复制积压缓冲区里面，如下图所示。
+<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/img/%E5%A4%8D%E5%88%B6%E7%A7%AF%E5%8E%8B%E5%8C%BA1.png)</div>
 
 因此，主服务器的复制积压缓冲区里面会保存着一部分最近传播的写命令，并且复制积压缓冲区会为队列中的每个字节记录相应的复制偏移量，如下图所示。
-<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/img/%E5%A4%8D%E5%88%B6%E7%A7%AF%E5%8E%8B%E5%8C%BA2.png)
-当从服务器重新连上主服务器时，从服务器会通过PSYNC命令将自己的复制偏移量offset发送给主服务器，主服务器会根据这个复制偏移量来决定对从服务器执行何种同步操作：
+<br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/img/%E5%A4%8D%E5%88%B6%E7%A7%AF%E5%8E%8B%E5%8C%BA2.png)</div>
+
+<br/>当从服务器重新连上主服务器时，从服务器会通过PSYNC命令将自己的复制偏移量offset发送给主服务器，主服务器会根据这个复制偏移量来决定对从服务器执行何种同步操作：
 * 如果offset偏移量之后的数据（也即是偏移量offset+1开始的数据）仍然存在于复制积压缓冲区里面，那么主服务器将对从服务器执行部分重同步操作；
 * 相反，如果offset偏移量之后的数据已经不存在于复制积压缓冲区，那么主服务器将对从服务器执行完整重同步操作
 
 复制积压缓冲区建议设置大小：2*second*write_size_per_second
 * second为从服务器断线后重新连接上主服务器所需的平均时间（以秒计算）
 * write_size_per_second是主服务器平均每秒产生的写命令数据量（协议格式的写命令的长度总和）
-
 #### 服务器的运行ID
 除了复制偏移量和复制积压缓冲区之外，实现部分重同步还需要用到服务器运行ID（run ID）：
 * 每个Redis服务器，不论主服务器还是从服务，都会有自己的运行ID；
