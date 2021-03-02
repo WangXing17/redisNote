@@ -8,9 +8,13 @@ Redis作为一个内存数据库，数据都是存储在内存中，那么一旦
 
 ## RDB持久化
 1. RDB文件的创建：分为手动创建和自动创建。
-    * SAVE命令：会阻塞服务器进程，阻塞期间服务器不能处理任何命令请求。
-    * BGSAVE命令：fork出一个子进程，子进程负责创建RDB文件，服务器进程（父进程）继续处理命令请求。执行流程如下图：
-    <br/><div align=center>![image](https://github.com/WangXing17/redis/blob/main/redis%E6%8C%81%E4%B9%85%E5%8C%96/img/bgsave.png)
+   <br/>1.1 SAVE命令：会阻塞服务器进程，阻塞期间服务器不能处理任何命令请求。
+   <br/>1.2 BGSAVE命令：fork出一个子进程，子进程负责创建RDB文件，服务器进程（父进程）继续处理命令请求。执行流程如下图：
+   <br/><div align=center>![image](https://github.com/WangXing17/redis/blob/main/redis%E6%8C%81%E4%B9%85%E5%8C%96/img/bgsave.png)</div>
+   * 1.2.1 BGSAVE底层实现代码：
+   <br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E6%8C%81%E4%B9%85%E5%8C%96/img/rdb1.jpg)
+   <br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E6%8C%81%E4%B9%85%E5%8C%96/img/rdb2.jpg)
+   <br/><div align=center>![image](https://github.com/WangXing17/redisNote/blob/main/redis%E6%8C%81%E4%B9%85%E5%8C%96/img/rdb3.jpg)
     
 2. RDB文件的载入：服务器启动时自动执行，在启动时检测到RDB文件存在，就会自动载入。
 <br/><div align=center>![image](https://github.com/WangXing17/redis/blob/main/redis%E6%8C%81%E4%B9%85%E5%8C%96/img/redis%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BD%BD%E5%85%A5%E6%96%87%E4%BB%B6%E5%88%A4%E6%96%AD%E6%B5%81%E7%A8%8B.png)
@@ -19,7 +23,7 @@ Redis作为一个内存数据库，数据都是存储在内存中，那么一旦
     * 服务器默认配置如下：
 <br/><div align=center>![image](https://github.com/WangXing17/redis/blob/main/redis%E6%8C%81%E4%B9%85%E5%8C%96/img/autoSave.png)
     * 实现原理：
-  redis服务器周期性操作函数serverCron默认每隔100毫秒就会执行一次，检查save选项所设置的保存条件是否满足，如果满足的话，执行BGSAVE命令。
+  redis服务器周期性操作函数serverCron默认每隔100毫秒就会执行一次，检查save选项所设置的保存条件是否满足，如果满足的话，执行BGSAVE命令。   
 
 4. RDB文件结构：RDB文件是一个经过压缩的二进制文件，有多个部分组成。
     * 总结构：
